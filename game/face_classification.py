@@ -39,7 +39,7 @@ class FaceClassification:
         self.emotions = {'angry': 'angry', 'disgust': 'sad', 'fear': 'fear', 'happy': 'happy', 'sad': 'sad',
                          'surprise': 'surprise', 'neutral': 'neutral'}
 
-    def update(self, bgr_image):
+    def recognise(self, bgr_image):
         gray_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
         rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
         faces = detect_faces(self.face_detection, gray_image)

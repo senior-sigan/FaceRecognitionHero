@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from random import choice
+
 
 import cv2
 import numpy as np
@@ -16,16 +16,18 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004400"
 FPS = 30
 
-SHOW_TIME = 4000
+SHOW_TIME = 3000
 ANSWER_TIME = 1000
+
+MINI_FACE = 72
 
 
 class Face(Sprite):
-    def __init__(self, x, y, name):
+    def __init__(self, x, y, name, width=512, height=512):
         Sprite.__init__(self)
-        width, height = 512, 512
         self.name = name
-        self.image = image.load("assets/faces/{}.png".format(name))
+        img = image.load("assets/faces/{}.png".format(name))
+        self.image = pygame.transform.scale(img, (width, height))
         self.rect = Rect(x - width // 2, y - height // 2, width, height)
 
 
@@ -55,6 +57,21 @@ def freq_count(arr):
     return uniq[i]
 
 
+def choicer():
+    from random import choice
+    prev_choices = {}
+
+    def smart_choice(arr):
+        if len(prev_choices) == len(arr):
+            prev_choices.clear()
+        to_choice = [el for el in arr if prev_choices.get(el) is None]
+        el = choice(to_choice)
+        prev_choices[el] = True
+        return el
+
+    return smart_choice
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(DISPLAY)
@@ -73,6 +90,16 @@ def main():
              Face(x, y, "happy"),
              Face(x, y, "fear"),
              Face(x, y, "surprise"))
+    face_choicer = choicer()
+
+    small_faces = {
+        "angry": Face(x, y, "angry", MINI_FACE, MINI_FACE),
+        "neutral": Face(x, y, "neutral", MINI_FACE, MINI_FACE),
+        "sad": Face(x, y, "sad", MINI_FACE, MINI_FACE),
+        "happy": Face(x, y, "happy", MINI_FACE, MINI_FACE),
+        "fear": Face(x, y, "fear", MINI_FACE, MINI_FACE),
+        "surprise": Face(x, y, "surprise", MINI_FACE, MINI_FACE)
+    }
 
     answers = {True: Answer(x, y, "correct"), False: Answer(x, y, "wrong")}
 
@@ -91,7 +118,7 @@ def main():
 
     def next_face():
         nonlocal current_face
-        current_face = choice(faces)
+        current_face = face_choicer(faces)
         print("Should show: {}".format(current_face.name))
         entities.empty()
         entities.add(current_face)
@@ -134,7 +161,7 @@ def main():
                 raise SystemExit("QUIT")
 
         ret, frame = camera.read()
-        res = fc.update(frame)
+        res = fc.recognise(frame)
         faces_classified.append(res)
         frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

@@ -7,5 +7,5 @@ class FaceClassification:
     def __init__(self) -> None:
         self.labels = ('angry', 'fear', 'happy', 'sad', 'surprise', 'neutral')
 
-    def update(self, bgr_image):
+    def recognise(self, bgr_image):
         return choice(list(self.labels))
