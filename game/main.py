@@ -2,7 +2,7 @@
 from random import choice
 
 import pygame
-from pygame import Surface, Color, image, Rect
+from pygame import Surface, Color, image
 from pygame.locals import *
 from pygame.sprite import Sprite
 
@@ -10,6 +10,10 @@ WIN_WIDTH = 800
 WIN_HEIGHT = 640
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004400"
+FPS = 60
+
+SHOW_TIME = 2000
+ANSWER_TIME = 1000
 
 
 class Face(Sprite):
@@ -22,12 +26,21 @@ class Face(Sprite):
 
 
 class Answer(Sprite):
-    def __init__(self, x, y, name):
+    def __init__(self, x, y, name, width=512, height=512):
         Sprite.__init__(self)
-        width, height = 512, 512
         self.name = name
-        self.image = image.load("assets/{}.png".format(name))
+        img = image.load("assets/{}.png".format(self.name))
+        self.image = pygame.transform.scale(img, (width, height))
         self.rect = Rect(x - width // 2, y - height // 2, width, height)
+
+
+class EmptyAnswer(Sprite):
+    def __init__(self, x, y, w=48, h=48):
+        Sprite.__init__(self)
+        color = "#003300"
+        self.image = Surface((w, h))
+        self.image.fill(Color(color))
+        self.rect = Rect(x, y, w, h)
 
 
 def main():
@@ -49,8 +62,13 @@ def main():
     entities = pygame.sprite.Group()
     entities.add(choice(faces))
 
-    timer = pygame.time.Clock()
-    time = 0
+    answers_background = pygame.sprite.Group()
+    answers_history = pygame.sprite.Group()
+    n = 10
+    answer_size = 64
+
+    for i in range(n):
+        answers_background.add(EmptyAnswer((WIN_WIDTH - n * answer_size) // 2 + i * answer_size, 12, 48, 48))
 
     def next_face():
         entities.empty()
@@ -58,17 +76,22 @@ def main():
 
     def answer():
         entities.empty()
-        entities.add(choice(answers))
+        a = choice(answers)
+        offset = (WIN_WIDTH - n * answer_size - 64 - 18) // 2
+        j = len(answers_history) + 1
+        answers_history.add(Answer(offset + j * answer_size, 36, a.name, 48, 48))
+        entities.add(a)
 
     time = 0
     changed = False
+    timer = pygame.time.Clock()
     while True:
-        delta = timer.tick(60)
+        delta = timer.tick(FPS)
         time += delta
-        if 2000 < time < 3000 and not changed:
+        if ANSWER_TIME < time <= SHOW_TIME and not changed:
             answer()
             changed = True
-        elif time > 3000:
+        elif time > SHOW_TIME:
             next_face()
             time = 0
             changed = False
@@ -79,6 +102,8 @@ def main():
 
         screen.blit(bg, (0, 0))
         entities.draw(screen)
+        answers_background.draw(screen)
+        answers_history.draw(screen)
         pygame.display.update()
 
 
