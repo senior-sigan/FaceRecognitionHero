@@ -75,7 +75,7 @@ def choicer():
 def main():
     pygame.init()
     screen = pygame.display.set_mode(DISPLAY)
-    pygame.display.set_caption("Troll Faces")
+    pygame.display.set_caption("FaceRecognitionHero")
     bg = Surface(DISPLAY)
     bg.fill(Color(BACKGROUND_COLOR))
 
@@ -134,6 +134,7 @@ def main():
     def next_face():
         nonlocal current_face
         current_face = face_choicer(faces)
+        print("=" * 30)
         print("Should show: {}".format(current_face.name))
         entities.empty()
         entities.add(current_face)
