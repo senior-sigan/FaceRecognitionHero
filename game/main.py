@@ -13,7 +13,7 @@ camera = cv2.VideoCapture(0)
 WIN_WIDTH = 800
 WIN_HEIGHT = 720
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
-BACKGROUND_COLOR = "#004400"
+BACKGROUND_COLOR = "#FFFFFF"
 FPS = 30
 
 SHOW_TIME = 3000
@@ -23,10 +23,10 @@ MINI_FACE = 72
 
 
 class Face(Sprite):
-    def __init__(self, x, y, name, width=512, height=512):
+    def __init__(self, x, y, name, path, width=512, height=512):
         Sprite.__init__(self)
         self.name = name
-        img = image.load("assets/faces/{}.png".format(name))
+        img = image.load("assets/faces/{}".format(path))
         self.image = pygame.transform.scale(img, (width, height))
         self.rect = Rect(x - width // 2, y - height // 2, width, height)
 
@@ -79,26 +79,41 @@ def main():
     bg = Surface(DISPLAY)
     bg.fill(Color(BACKGROUND_COLOR))
 
-    # from random_face_classification import FaceClassification
-    from face_classification import FaceClassification
+    from random_face_classification import FaceClassification
+    # from face_classification import FaceClassification
     fc = FaceClassification()
 
     x, y = WIN_WIDTH // 2, WIN_HEIGHT // 2
-    faces = (Face(x, y, "angry"),
-             Face(x, y, "neutral"),
-             Face(x, y, "sad"),
-             Face(x, y, "happy"),
-             Face(x, y, "fear"),
-             Face(x, y, "surprise"))
+    faces = (Face(x, y, "angry", "angry.png"),
+             Face(x, y, "neutral", "neutral.png"),
+             Face(x, y, "sad", "sad.png"),
+             Face(x, y, "happy", "happy.png"),
+             Face(x, y, "fear", "fear.png"),
+             Face(x, y, "surprise", "surprise.png"),
+
+             Face(x, y, "angry", "angry1.png"),
+             Face(x, y, "neutral", "neutral1.jpg"),
+             Face(x, y, "sad", "sad1.jpg"),
+             Face(x, y, "happy", "happy1.png"),
+             Face(x, y, "fear", "fear1.png"),
+             Face(x, y, "surprise", "surprise1.jpg"),
+
+             Face(x, y, "angry", "angry2.jpg"),
+             Face(x, y, "neutral", "neutral2.png"),
+             Face(x, y, "sad", "sad2.png"),
+             Face(x, y, "happy", "happy2.jpg"),
+             Face(x, y, "fear", "fear2.png"),
+             Face(x, y, "surprise", "surprise2.jpg")
+             )
     face_choicer = choicer()
 
     small_faces = {
-        "angry": Face(x, y, "angry", MINI_FACE, MINI_FACE),
-        "neutral": Face(x, y, "neutral", MINI_FACE, MINI_FACE),
-        "sad": Face(x, y, "sad", MINI_FACE, MINI_FACE),
-        "happy": Face(x, y, "happy", MINI_FACE, MINI_FACE),
-        "fear": Face(x, y, "fear", MINI_FACE, MINI_FACE),
-        "surprise": Face(x, y, "surprise", MINI_FACE, MINI_FACE)
+        "angry": Face(x, y, "angry", "angry.png", MINI_FACE, MINI_FACE),
+        "neutral": Face(x, y, "neutral", "neutral.png", MINI_FACE, MINI_FACE),
+        "sad": Face(x, y, "sad", "sad.png", MINI_FACE, MINI_FACE),
+        "happy": Face(x, y, "happy", "happy.png", MINI_FACE, MINI_FACE),
+        "fear": Face(x, y, "fear", "fear.png", MINI_FACE, MINI_FACE),
+        "surprise": Face(x, y, "surprise", "surprise.png", MINI_FACE, MINI_FACE)
     }
 
     answers = {True: Answer(x, y, "correct"), False: Answer(x, y, "wrong")}
@@ -170,6 +185,7 @@ def main():
 
         screen.blit(bg, (0, 0))
         screen.blit(frame, (0, WIN_HEIGHT - 180))
+        screen.blit(small_faces[res].image, (0, 0))
         entities.draw(screen)
         answers_background.draw(screen)
         answers_history.draw(screen)
