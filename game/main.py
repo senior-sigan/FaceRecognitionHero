@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 from random import choice
 
+import cv2
+import numpy as np
 import pygame
 from pygame import Surface, Color, image
 from pygame.locals import *
 from pygame.sprite import Sprite
 
+camera = cv2.VideoCapture(0)
+
 WIN_WIDTH = 800
-WIN_HEIGHT = 640
+WIN_HEIGHT = 720
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004400"
-FPS = 60
+FPS = 30
 
-SHOW_TIME = 2000
+SHOW_TIME = 4000
 ANSWER_TIME = 1000
 
 
@@ -43,6 +47,14 @@ class EmptyAnswer(Sprite):
         self.rect = Rect(x, y, w, h)
 
 
+def freq_count(arr):
+    offset = len(arr) // 3
+    arr = arr[offset:]  # skip first elements because nobody will be able to detect it
+    uniq, counts = np.unique(arr, return_counts=True)
+    i = np.argmax(counts)
+    return uniq[i]
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(DISPLAY)
@@ -50,17 +62,24 @@ def main():
     bg = Surface(DISPLAY)
     bg.fill(Color(BACKGROUND_COLOR))
 
+    # from random_face_classification import FaceClassification
+    from face_classification import FaceClassification
+    fc = FaceClassification()
+
     x, y = WIN_WIDTH // 2, WIN_HEIGHT // 2
     faces = (Face(x, y, "angry"),
              Face(x, y, "neutral"),
              Face(x, y, "sad"),
-             Face(x, y, "smile"),
+             Face(x, y, "happy"),
+             Face(x, y, "fear"),
              Face(x, y, "surprise"))
 
-    answers = (Answer(x, y, "correct"), Answer(x, y, "wrong"))
+    answers = {True: Answer(x, y, "correct"), False: Answer(x, y, "wrong")}
+
+    current_face = None
+    faces_classified = []
 
     entities = pygame.sprite.Group()
-    entities.add(choice(faces))
 
     answers_background = pygame.sprite.Group()
     answers_history = pygame.sprite.Group()
@@ -71,16 +90,30 @@ def main():
         answers_background.add(EmptyAnswer((WIN_WIDTH - n * answer_size) // 2 + i * answer_size, 12, 48, 48))
 
     def next_face():
+        nonlocal current_face
+        current_face = choice(faces)
+        print("Should show: {}".format(current_face.name))
         entities.empty()
-        entities.add(choice(faces))
+        entities.add(current_face)
 
     def answer():
+        nonlocal faces_classified
+        main_face = freq_count(faces_classified)
+        print(faces_classified)
+        print("{} == {}".format(main_face, current_face.name))
+        a = answers[main_face == current_face.name]
+
+        faces_classified = []
         entities.empty()
-        a = choice(answers)
+
         offset = (WIN_WIDTH - n * answer_size - 64 - 18) // 2
+        if len(answers_history) >= n:
+            answers_history.empty()
         j = len(answers_history) + 1
         answers_history.add(Answer(offset + j * answer_size, 36, a.name, 48, 48))
         entities.add(a)
+
+    next_face()
 
     time = 0
     changed = False
@@ -88,10 +121,10 @@ def main():
     while True:
         delta = timer.tick(FPS)
         time += delta
-        if ANSWER_TIME < time <= SHOW_TIME and not changed:
+        if SHOW_TIME < time <= SHOW_TIME + ANSWER_TIME and not changed:
             answer()
             changed = True
-        elif time > SHOW_TIME:
+        elif time > SHOW_TIME + ANSWER_TIME:
             next_face()
             time = 0
             changed = False
@@ -100,7 +133,16 @@ def main():
             if e.type == QUIT:
                 raise SystemExit("QUIT")
 
+        ret, frame = camera.read()
+        res = fc.update(frame)
+        faces_classified.append(res)
+        frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = np.rot90(frame)
+        frame = pygame.surfarray.make_surface(frame)
+
         screen.blit(bg, (0, 0))
+        screen.blit(frame, (0, WIN_HEIGHT - 180))
         entities.draw(screen)
         answers_background.draw(screen)
         answers_history.draw(screen)
