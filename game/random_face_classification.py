@@ -8,4 +8,5 @@ class FaceClassification:
         self.labels = ('angry', 'fear', 'happy', 'sad', 'surprise', 'neutral')
 
     def recognise(self, bgr_image):
-        return choice(list(self.labels))
+        # return choice(list(self.labels))
+        return "empty"

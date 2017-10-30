@@ -16,7 +16,7 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#FFFFFF"
 FPS = 30
 
-SHOW_TIME = 3000
+SHOW_TIME = 4000
 ANSWER_TIME = 1000
 
 MINI_FACE = 72
@@ -79,8 +79,8 @@ def main():
     bg = Surface(DISPLAY)
     bg.fill(Color(BACKGROUND_COLOR))
 
-    from random_face_classification import FaceClassification
-    # from face_classification import FaceClassification
+    # from random_face_classification import FaceClassification
+    from face_classification import FaceClassification
     fc = FaceClassification()
 
     x, y = WIN_WIDTH // 2, WIN_HEIGHT // 2
@@ -108,6 +108,7 @@ def main():
     face_choicer = choicer()
 
     small_faces = {
+        "empty": Face(x, y, "empty", "empty.jpg", MINI_FACE, MINI_FACE),
         "angry": Face(x, y, "angry", "angry.png", MINI_FACE, MINI_FACE),
         "neutral": Face(x, y, "neutral", "neutral.png", MINI_FACE, MINI_FACE),
         "sad": Face(x, y, "sad", "sad.png", MINI_FACE, MINI_FACE),

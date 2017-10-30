@@ -70,4 +70,4 @@ class FaceClassification:
 
             return self.emotions.get(emotion_text, 'neutral')
 
-        return 'neutral'  # in other cases
+        return "empty"  # in other cases
