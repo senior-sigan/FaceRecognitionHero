@@ -1,3 +1,3 @@
-# FaceRevolution (aka DanceRevolution 😄)
+# FaceRevolution (like DanceRevolution 😄)
 
 TBDL
